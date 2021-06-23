@@ -6,22 +6,26 @@
   "scripts": {
     "test": "DEBUG=true mocha -r ts-node/register --exit --timeout 50000 './tests/*.test.ts'"
   },
-  "author": "Oladotun Sobande <oladotun@softcom.ng>",
+  "author": "Oladotun Sobande <oladutch@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "app-root-path": "^3.0.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "morgan": "^1.10.0",
     "redis": "^3.1.2",
     "socket.io": "^4.1.2",
-    "socket.io-client": "^4.1.2"
+    "socket.io-client": "^4.1.2",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
+    "@types/app-root-path": "^1.2.4",
     "@types/dotenv-safe": "^8.1.1",
     "@types/express": "^4.17.12",
     "@types/mocha": "^8.2.2",
     "@types/morgan": "^1.9.2",
     "@types/node": "^15.12.4",
+    "@types/redis": "^2.8.29",
     "@types/socket.io": "^3.0.2",
     "@types/socket.io-client": "^3.0.0",
     "expect": "^27.0.2",
