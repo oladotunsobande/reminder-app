@@ -1,7 +1,6 @@
 import redis from 'redis';
 import * as env from './config/env';
-import { redisAsync } from './util/redis';
-import { DEFAULT_REDIS_DB, EVENT_NOTIFICATION_CHANNEL } from './constants';
+import { DEFAULT_REDIS_DB, EVENT_NOTIFICATION_CHANNELS } from './constants';
 
 class Socket {
   private io: any;
@@ -26,26 +25,24 @@ class Socket {
     socket.join(event);
   }
 
-  private broadcast(orderId: string, message: string) {
-    this.io.in(orderId).emit('kds-update', message);
+  private broadcast(event: string, message: string) {
+    this.io.in(event).emit('reminder:event-notification', message);
   }
 
   startRedisSubscriber() {
     this.sub.on('message',  (channel: string, message: string) => {
-      const payload = JSON.parse(message);
-      this.broadcast(payload.orderId, JSON.stringify(payload));
+      if (channel === EVENT_NOTIFICATION_CHANNELS.SOCKET_BROADCAST) {
+        const { event, date, time } = JSON.parse(message);
+        this.broadcast(event, `[EVENT REMINDER NOTIFICATION] - Event: ${event}, Date: ${date}, Time: ${time}`);
+      }
     });
     
-    this.sub.subscribe(EVENT_NOTIFICATION_CHANNEL);
+    this.sub.subscribe(EVENT_NOTIFICATION_CHANNELS.SOCKET_BROADCAST);
   }
 
   startSocketServer() {
     this.io.on('connection', (socket: any) => {
       this.subscribe(socket);
-    
-      socket.on('kds:order', async (data: string) => {
-      
-      });
     
       socket.on('disconnect', async () => {
         socket.disconnect(true);

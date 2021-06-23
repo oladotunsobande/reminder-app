@@ -1,20 +1,23 @@
 import redis from 'redis';
 import * as env from '../config/env';
+import { DEFAULT_REDIS_DB } from '../constants';
 
 const publisher = redis.createClient({
   host: env.REDIS_HOST,
   port: parseInt(env.REDIS_PORT),
+  db: DEFAULT_REDIS_DB,
 });
 
 const subscriber = redis.createClient({
   host: env.REDIS_HOST,
   port: parseInt(env.REDIS_PORT),
+  db: DEFAULT_REDIS_DB,
 });
 subscriber.setMaxListeners(0);
 
 class Subscriber {
   publish (channel: string, message: string) {
-    publisher.publish(channel, message);
+    publisher.publish(channel, message, () => {});
   } 
   
   subscribe (channel: string) {

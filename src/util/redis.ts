@@ -1,9 +1,14 @@
 import redis from 'redis';
 import util from 'util';
 import * as env from '../config/env';
+import { DEFAULT_REDIS_DB } from '../constants';
 import { logger } from './logger';
 
-export const redisClient = redis.createClient(env.REDIS_URL);
+export const redisClient = redis.createClient({
+  host: env.REDIS_HOST,
+  port: parseInt(env.REDIS_PORT),
+  db: DEFAULT_REDIS_DB,
+});
 
 redisClient.on('connect', () => {
   logger.info('Connected to Redis!');
