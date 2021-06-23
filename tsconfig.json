@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "module": "commonjs",                     
+    "strict": true, 
+    "typeRoots": ["./node_modules/@types"],
+    "outDir": "dist",               
+    "esModuleInterop": true,
+    "types": ["node", "reflect-metadata", "mocha"],                   
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "/tests/"],
+}
