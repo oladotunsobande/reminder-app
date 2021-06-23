@@ -11,7 +11,9 @@ class ReminderService {
   constructor() {
     this.redis = redisAsync;
     this.client = redisClient;
+  }
 
+  init () {
     this.client.on('ready', () => {
       logger.info('Redis connection is READY');
       this.client.config("SET", "notify-keyspace-events", "Ex");
