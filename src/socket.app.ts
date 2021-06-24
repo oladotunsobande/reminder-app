@@ -33,37 +33,43 @@ class Socket {
     const validationResponse: ValidationResponseType = validatePayload(payload);
     if (!validationResponse.status) {
       this.io.to(socket.id).emit('reminder:error', validationResponse.error!);
-      socket.disconnect(true);
-  
+      return;
+    }
+
+    const data: string | null = await redisAsync.get(payload.id);
+    if (data) {
+      this.io.to(socket.id).emit('reminder:error', `Event channel (${payload.id}) already exists`);
       return;
     }
 
     const reminderService = new ReminderService();
     await reminderService.setReminder({ ...payload });
     logger.info(`Event reminder created for ${payload.event}`);
+
+    this.io.to(socket.id).emit('reminder:event-creation', 'Event channel created successfully');
+    return;
   }
 
-  private async subscribe(socket: any) {
-    const eventKey: string = socket.handshake.query.key;
-    if (eventKey) {
-      const data: string | null = await redisAsync.get(eventKey);
-      if (!data) {
-        this.io.to(socket.id).emit('reminder:error', `Event (${eventKey}) does not exist`);
-        socket.disconnect(true);
-
-        return;
-      }
-
-      socket.join(eventKey);
-      logger.info(`Client added to event channel, ${eventKey}`);
-    } else {
-      logger.info('Connected to socket server');
+  private async subscribe(socket: any, channel: string) {
+    if (!channel) {
+      this.io.to(socket.id).emit('reminder:error', 'Event channel must be a valid string');
+      return;
     }
+
+    const data: string | null = await redisAsync.get(channel);
+    if (!data) {
+      this.io.to(socket.id).emit('reminder:error', `Event (${channel}) does not exist`);
+      return;
+    }
+
+    socket.join(channel);
+    logger.info(`Client added to event channel, ${channel}`);
   }
 
   private broadcast(event: string, message: string) {
     this.io.in(event).emit('reminder:event-notification', message);
-    logger.info(`[ ${event} ] - Notifications sent!`)
+    logger.info(`[ ${event} ] - Notifications sent!`);
+    return;
   }
 
   startRedisSubscriber() {
@@ -88,7 +94,11 @@ class Socket {
 
   startSocketServer() {
     this.io.on('connection', (socket: any) => {
-      this.subscribe(socket);
+      logger.info('Client connected');
+
+      socket.on('reminder:event-subscription', async (channel: string) => {
+        await this.subscribe(socket, channel);
+      });
 
       socket.on('reminder:new-event', async (message: string) => {
         await this.addNewEventReminder(socket, JSON.parse(message));   
@@ -104,6 +114,10 @@ class Socket {
         logger.info('Client disconnected');
       });
     });
+  }
+
+  close() {
+    this.io.close();
   }
 }
 

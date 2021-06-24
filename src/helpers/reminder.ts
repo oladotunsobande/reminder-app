@@ -1,4 +1,5 @@
 import redis from 'redis';
+import randomstring from 'randomstring';
 import * as env from '../config/env';
 
 const pub = redis.createClient({
@@ -6,15 +7,24 @@ const pub = redis.createClient({
   port: parseInt(env.REDIS_PORT),
 });
 
-function formatHourOrMinute(value: string): number {
-  if (value.length == 2 && value.startsWith('0')) {
+export function formatHourOrMinute(value: string, addZeros: boolean = false): number {
+  if (value.length == 2 && value.startsWith('0') && !addZeros) {
     return parseInt(value[1]);
+  } else if (value.length == 1 && addZeros) {
+    return parseInt(`0${value[0]}`);
   }
 
   return parseInt(value);
 }
 
-function getEventExpiry(date: string, time: string): number {
+export function generateUniqueId() {
+ return randomstring.generate({
+   charset: 'alphanumeric',
+   length: 20,
+ });
+}
+
+export function getEventExpiry(date: string, time: string): number {
   const dateObject: any = new Date(date);
 
   const day = dateObject.getDate();

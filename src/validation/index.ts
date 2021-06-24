@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { getEventExpiry } from '../helpers/reminder';
 
 export function validatePayload(payload: any): {
   status: boolean;
@@ -22,6 +23,10 @@ export function validatePayload(payload: any): {
       : validation.error.details[0].message;
     
     return { status: false, error };
+  }
+
+  if (getEventExpiry(payload.date, payload.time) < 0) {
+    return { status: false, error: "\"time\" must be greater than or equal to current time" };
   }
 
   return { status: true };
