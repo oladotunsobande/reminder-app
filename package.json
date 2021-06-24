@@ -1,7 +1,7 @@
 {
   "name": "reminder-app",
   "version": "1.0.0",
-  "description": "Event reminder service",
+  "description": "Event reminder service using Socket.io and Redis keyspace notifications",
   "main": "index.js",
   "scripts": {
     "socket": "ts-node src/socket.ts",
