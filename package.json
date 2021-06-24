@@ -4,7 +4,6 @@
   "description": "Event reminder service",
   "main": "index.js",
   "scripts": {
-    "server": "ts-node src/server.ts",
     "socket": "ts-node src/socket.ts",
     "test": "DEBUG=true mocha -r ts-node/register --exit --timeout 50000 './tests/*.test.ts'"
   },

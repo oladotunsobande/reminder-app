@@ -1,33 +1,28 @@
 import Joi from 'joi';
-import { Request, Response, NextFunction } from 'express';
-import { ResponseType } from '../types';
-import ResponseHandler from '../util/response-handler';
 
-export async function validateSetReminder(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<ResponseType> {
+export function validatePayload(payload: any): {
+  status: boolean;
+  error?: string;
+} {
   const schema = Joi.object().keys({
+    id: Joi.string().max(24).required(),
     event: Joi.string().max(32).required(),
     date: Joi.date()
-      .min('now')
+      .min(new Date().toDateString())
       .required(),
     time: Joi.string()
       .regex(/^([01]\d|2[0-3]):?([0-5]\d)$/)
       .required(),
   });
 
-  const validation = schema.validate(req.body);
+  const validation = schema.validate(payload);
   if (validation.error) {
     const error = validation.error.message
       ? validation.error.message
       : validation.error.details[0].message;
-    return ResponseHandler.sendErrorResponse({
-      res,
-      error,
-    });
+    
+    return { status: false, error };
   }
 
-  return next();
+  return { status: true };
 }

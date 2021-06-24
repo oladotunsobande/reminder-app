@@ -1,15 +1,14 @@
 import { RedisClient } from 'redis';
 import { logger } from '../util/logger';
-import { redisClient, redisAsync } from '../util/redis';
+import { redisClient } from '../util/redis';
 import { EVENT_REMINDER_PREFIX } from '../constants';
 import * as ReminderHelper from '../helpers/reminder';
+import { EventReminderPayloadType } from '../types';
 
 class ReminderService {
-  private redis: any;
   private client: RedisClient;
 
   constructor() {
-    this.redis = redisAsync;
     this.client = redisClient;
   }
 
@@ -20,18 +19,14 @@ class ReminderService {
     });
   }
 
-  async getEvent (key: string) {
-    return this.redis.get(key);
-  }
-
-  async setReminder (event: string, date: string, time: string) {
-    const { key, value, expiry } = ReminderHelper.setReminderDetails(event, date, time);
-    return this.redis.set(
-      `${EVENT_REMINDER_PREFIX}:${key}`, 
-      value, 
-      'EX', 
-      expiry,
-    );
+  async setReminder ({id, event, date, time }: EventReminderPayloadType) {
+    const { value, expiry } = ReminderHelper.setReminderDetails(event, date, time);
+    return this.client
+      .multi()
+      .set(id, value)
+      .set(`${EVENT_REMINDER_PREFIX}:${id}`, event)
+      .expire(`${EVENT_REMINDER_PREFIX}:${id}`, expiry)
+      .exec();
   }
 }
 

@@ -1,9 +1,11 @@
-import { Response } from 'express';
-
-export type ResponseType = Response | void;
-
-export type DefaultResponseType = {
+export type ValidationResponseType = {
   status: boolean;
-  data?: any;
   error?: string;
+};
+
+export type EventReminderPayloadType = {
+  id: string;
+  event: string;
+  date: string;
+  time: string;
 };
